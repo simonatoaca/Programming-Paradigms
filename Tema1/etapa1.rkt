@@ -2,8 +2,6 @@
 
 (provide (all-defined-out))
 
-(require (lib "trace.ss"))
-
 ; TODO 1
 ; Implementați o funcție care primește lista preferințelor
 ; bărbaților și calculează lista bărbaților din problemă.
@@ -46,7 +44,6 @@
 (define (get-pref-list pref person); am folosit recursivitate pe coada
   (get-pref-list-iter (car pref) (cdr pref) person))
 
-
 ; TODO 4
 ; Implementați o funcție recursivă care primește o listă de tipul
 ; întors la exercițiul precedent (lista preferințelor unei persoane),
@@ -55,8 +52,17 @@
 ; și false în caz contrar.
 ; Nu folosiți operatori condiționali, folosiți în schimb operatori
 ; logici pentru a obține același efect.
+
+; Explicatie
+; daca lista e nula, intoarce true, altfel verifica daca primul element este x
+; daca elementul este x intoarce true, altfel verifica daca este y (daca nu a dat de x, dar a dat
+; de y, atunci inseamna ca y e inaintea lui x) -> daca este y, intoarce false, altfel nu au fost gasite
+; inca nici x, nici y si se continua trecerea prin lista
 (define (preferable? pref-list x y)
-  'your-code-here)
+  (or (null? pref-list)
+      (or (equal? (car pref-list) x)
+          (and (not (equal? (car pref-list) y))
+               (preferable? (cdr pref-list) x y)))))
 
 
 ; TODO 5
@@ -67,7 +73,10 @@
 ; întoarce false.
 ; Folosiți cond.
 (define (get-partner engagements person)
-  'your-code-here)
+  (cond
+    ((null? engagements) #f)
+    ((equal? (car (car engagements)) person) (cdr (car engagements)))
+    (else (get-partner (cdr engagements) person))))
 
 
 ; TODO 6
