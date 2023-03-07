@@ -9,18 +9,21 @@
 ; bărbaților și calculează lista bărbaților din problemă.
 ; Folosiți recursivitate pe stivă.
 (define (get-men mpref)
-  (if (null? mpref)
+  (if (null? mpref); daca lista ramasa e nula, se termina recursia si se adauga null la lista finala
       null
-      (cons (car (car mpref)) (get-men (cdr mpref)))))
-
-(trace get-men)
+      (cons (car (car mpref)) (get-men (cdr mpref))))); se adauga urmatorul element la lista finala
 
 ; TODO 2
 ; Implementați o funcție care primește lista preferințelor
 ; femeilor și calculează lista femeilor din problemă.
 ; Folosiți recursivitate pe coadă.
+(define (get-women-iter elem list wpref)
+  (if (null? wpref)
+      (cons elem list)
+      (get-women-iter (car (car wpref)) (cons elem list) (cdr wpref))))
 
-(define (get-women wpref))
+(define (get-women wpref)
+  (reverse (get-women-iter (car (car wpref)) null  (cdr wpref))))
 
 
 ; TODO 3
@@ -34,8 +37,14 @@
 ; Observație: de fiecare dată când ne referim la lista
 ; preferințelor unei persoane p, ne referim la o listă care conține
 ; doar persoanele de sex opus, nu și pe p pe prima poziție.
-(define (get-pref-list pref person)
-  'your-code-here)
+
+(define (get-pref-list-iter list pref person)
+   (if (eq? (car list) person)
+      (cdr list); intoarce lista fara persoana p
+      (get-pref-list-iter (car pref) (cdr pref) person))) ; treci la urmatoarea lista de preferinte
+
+(define (get-pref-list pref person); am folosit recursivitate pe coada
+  (get-pref-list-iter (car pref) (cdr pref) person))
 
 
 ; TODO 4
