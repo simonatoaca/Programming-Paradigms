@@ -88,7 +88,16 @@
 ; - lista logodnelor este completă, este un posibil rezultat al problemei
 ; - logodnele din listă au pe prima poziție persoana de același gen cu p2
 ; - un partener p' este mai potrivit decât p2 dacă îndeplinește 2 condiții:
-;   - p1 îl preferă pe p' în raport cu p2
-;   - p' îl preferă pe p1 în raport cu persoana cu care este logodit
+;   - p1 îl preferă pe p' în raport cu p2 -> p' se afla inaintea lui p2 in lista lui p1 de preferinte
+;   - p' îl preferă pe p1 în raport cu persoana cu care este logodit -> p1 se afla inaintea partenerului lui p' in lista de preferinte
+
+; verifica daca p este un better match pt p1
+(define (better-match? p p1 p2 p1-list pref2 engagements)
+     (and (preferable? p1-list p p2); daca p se afla inaintea lui p2 in lista de pref ale lui p1
+          (preferable? (get-pref-list pref2 p) p1 (get-partner engagements p))))
+
 (define (better-match-exists? p1 p2 p1-list pref2 engagements)
-  'your-code-here)
+  (if (or (null? p1-list) (equal? (car p1-list) p2)) ; daca lista e nula sau se da de p2 in lista lui p1 (dupa nu mai are sens cautarea)
+      #f
+      (or (better-match? (car p1-list) p1 p2 p1-list pref2 engagements)
+          (better-match-exists? p1 p2 (cdr p1-list) pref2 engagements))))
