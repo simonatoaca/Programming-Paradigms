@@ -2,10 +2,6 @@
 
 (provide (all-defined-out))
 
-<<<<<<< HEAD
-=======
-; TODO 1
->>>>>>> 3eba15b14e4fbddf1c48dd27208677f364e38958
 ; Implementați o funcție care primește lista preferințelor
 ; bărbaților și calculează lista bărbaților din problemă.
 ; Folosiți recursivitate pe stivă.
@@ -14,10 +10,6 @@
       null
       (cons (car (car mpref)) (get-men (cdr mpref))))); se adauga urmatorul element la lista finala
 
-<<<<<<< HEAD
-=======
-; TODO 2
->>>>>>> 3eba15b14e4fbddf1c48dd27208677f364e38958
 ; Implementați o funcție care primește lista preferințelor
 ; femeilor și calculează lista femeilor din problemă.
 ; Folosiți recursivitate pe coadă.
@@ -30,10 +22,6 @@
   (reverse (get-women-iter (car (car wpref)) null  (cdr wpref))))
 
 
-<<<<<<< HEAD
-=======
-; TODO 3
->>>>>>> 3eba15b14e4fbddf1c48dd27208677f364e38958
 ; Implementați o funcție recursivă care primește o listă de liste
 ; de preferințe (ori lista preferințelor bărbaților, ori a
 ; femeilor) și o persoană ale cărei preferințe apar în listă,
@@ -53,11 +41,7 @@
 (define (get-pref-list pref person); am folosit recursivitate pe coada
   (get-pref-list-iter (car pref) (cdr pref) person))
 
-<<<<<<< HEAD
 
-=======
-; TODO 4
->>>>>>> 3eba15b14e4fbddf1c48dd27208677f364e38958
 ; Implementați o funcție recursivă care primește o listă de tipul
 ; întors la exercițiul precedent (lista preferințelor unei persoane),
 ; respectiv două persoane x și y care apar în lista respectivă,
@@ -78,10 +62,6 @@
                (preferable? (cdr pref-list) x y)))))
 
 
-<<<<<<< HEAD
-=======
-; TODO 5
->>>>>>> 3eba15b14e4fbddf1c48dd27208677f364e38958
 ; Implementați o funcție recursivă care primește o listă de logodne
 ; (în care fiecare logodnă este o pereche cu punct între parteneri)
 ; și o persoană, și, în cazul în care această persoană apare pe prima
@@ -95,10 +75,6 @@
     (else (get-partner (cdr engagements) person))))
 
 
-<<<<<<< HEAD
-=======
-; TODO 6
->>>>>>> 3eba15b14e4fbddf1c48dd27208677f364e38958
 ; Implementați o funcție care primește 2 persoane logodite, p1 și p2,
 ; lista preferințelor lui p1, lista preferințelor tuturor persoanelor
 ; de același gen cu p2, respectiv lista tuturor logodnelor, și întoarce
@@ -116,11 +92,6 @@
           (preferable? (get-pref-list pref2 p) p1 (get-partner engagements p))))
 
 (define (better-match-exists? p1 p2 p1-list pref2 engagements)
-<<<<<<< HEAD
   (and (not (or (null? p1-list) (equal? (car p1-list) p2))) ; daca lista e nula sau se da de p2 in lista lui p1 (dupa nu mai are sens cautarea)
-=======
-  (if (or (null? p1-list) (equal? (car p1-list) p2)) ; daca lista e nula sau se da de p2 in lista lui p1 (dupa nu mai are sens cautarea)
-      #f
->>>>>>> 3eba15b14e4fbddf1c48dd27208677f364e38958
       (or (better-match? (car p1-list) p1 p2 p1-list pref2 engagements)
           (better-match-exists? p1 p2 (cdr p1-list) pref2 engagements))))
