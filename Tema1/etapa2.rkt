@@ -130,7 +130,6 @@
       (or (better-match? (car p1-list) p1 p2 p1-list pref2 engagements)
           (better-match-exists? p1 p2 (cdr p1-list) pref2 engagements))))
 
-
 ; TODO 9
 ; Implementați funcția stable-match? care primește o listă 
 ; completă de logodne engagements, o listă de preferințe masculine 
@@ -143,7 +142,12 @@
 ; - fiecare cuplu din lista engagements are pe prima poziție
 ;   o femeie
 
+; inverseaza ordinea oamenilor intr o pereche
+(define (rev-eng engagements)
+  (map (λ (x) (cons (cdr x) (car x))) engagements))
+
 ; filtreaza logodnele pt care ar exista o potrivire mai buna, daca lista e nula -> true
 (define (stable-match? engagements mpref wpref)
-  (or (null? (filter (λ (x) (better-match-exists? (cdr x) (car x) (get-pref-list mpref (cdr x)) wpref engagements)) engagements))
+  (or (null? (filter (λ (x) (or (better-match-exists? (cdr x) (car x) (get-pref-list mpref (cdr x)) wpref engagements)
+                                (better-match-exists? (car x) (cdr x) (get-pref-list wpref (car x)) mpref (rev-eng engagements)))) engagements))
       #f))
