@@ -1,6 +1,7 @@
 #lang racket
 
-(require "etapa1.rkt")
+(require "etapa2.rkt")
+(require "etapa3.rkt")
 
 ; ignorați următoarele linii de cod...
 (define show-defaults 999) ; câte exerciții la care s-au întors rezultate default să fie arătate detaliat
@@ -12,7 +13,7 @@
 (define (whengood ep%) (let [(pts (* p-ex (caddr ep%)))] (and (if prepend (printf "+~v: " pts) (printf "~a[OK] " (p-n-ex))) (if nopoints (p (epart ep% "" #f) "rezolvat") (p (epart ep% "" #f) "rezolvat: +" pts (if (= pts 1) 'punct 'puncte))) (set! total (+ total pts)))))
 (define (whenbad ep% gvn expcd msg) (and (when (member gvn default-results) (set! default-returns (cons (epart ep% "" #t) default-returns))) (when (or (not (member gvn default-results)) (<= (length default-returns) show-defaults)) (bad-res ep% gvn expcd msg))))
 (define (bad-res ep% gvn expcd msg) (p (if prepend "+0.0:" (format "~a[--]" (p-n-ex))) (epart ep% "la " #f) 'rezultatul gvn msg expcd))
-(define (check-conds e gvn conds) (or (null? conds) (let ([r ((car conds) gvn)]) (if (eq? r #t) (check-conds e gvn (cdr conds)) (whenbad e gvn "" (or r "nu îndeplinește condiția"))))))
+(define (check-conds e gvn conds) (or (null? conds) (let ([r ((car conds) gvn)]) (if (eq? r #t) (check-conds e gvn (cdr conds)) (whenbad e gvn "" (or r "nu îndeplinește condițiile (completitudine, stabilitate)"))))))
 (define (check-part part per given main-test expected . conds) (let* ([e (list n-ex part per)] [p? (pair? (cdr main-test))] [p (if p? (car main-test) identity)] [t ((if p? cadr car) main-test)] [m ((if p? cddr cdr) main-test)]) (when (eq? #t (check-conds e given conds)) (if (t (p given) expected) (whengood e) (whenbad e (p given) expected m)))))
 (define (check given main-test expected . conds) (apply check-part '- 1 given main-test expected conds))
 (define the cons) (define is (cons equal? "diferă de cel așteptat")) (define in (cons member "nu se află printre variantele așteptate"))
@@ -76,57 +77,186 @@
     [ivy  ian  col  hal  gav  fred bob  abe  ed   jon  dan ]
     [jan  ed   hal  gav  abe  bob  jon  col  ian  fred dan ]))
 
+(define men-preferences-3
+  '([abe  abi  eve  cath ivy  jan  dee  fay  bea  hope gay ]
+    [bob  abi hope  cath dee  eve  fay  bea  jan  ivy  gay ]
+    [col  hope eve  abi  dee  bea  fay  ivy  gay  cath jan ]
+    [dan  ivy  bea  dee  gay  hope eve  jan  fay  cath abi ]
+    [ed   fay  dee  bea  cath jan  eve  abi  ivy  hope gay ]
+    [fred bea  abi  dee  gay  eve  ivy  cath jan  hope fay ]
+    [gav  gay  eve  ivy  bea  cath abi  dee  hope jan  fay ]
+    [hal  abi  eve  hope fay  ivy  cath jan  bea  gay  dee ]
+    [ian  hope cath dee  gay  bea  abi  fay  ivy  jan  eve ]
+    [jon  abi  fay  jan  gay  eve  bea  dee  cath ivy  hope]))
+(define women-preferences-3
+  '([abi  bob  fred jon  gav  ian  abe  dan  ed   col  hal ]
+    [bea  bob  abe  col  fred gav  dan  ian  ed   jon  hal ]
+    [cath fred bob  ed   gav  hal  col  ian  abe  dan  jon ]
+    [dee  fred jon  col  abe  ian  hal  gav  dan  bob  ed  ]
+    [eve  jon  hal  fred dan  abe  gav  col  ed   ian  bob ]
+    [fay  bob  abe  ed   ian  jon  dan  fred gav  col  hal ]
+    [gay  jon  gav  hal  fred bob  abe  col  ed   dan  ian ]
+    [hope gav  jon  bob  abe  ian  dan  hal  ed   col  fred]
+    [ivy  ian  col  hal  gav  fred bob  abe  ed   jon  dan ]
+    [jan  ed   hal  gav  abe  bob  jon  col  ian  fred dan ]))
 
-(sunt 6 exerciții)
+(define men-preferences-4
+  '([abe  abi  eve  cath ivy  jan  dee  fay  bea  hope gay ]
+    [bob  abi hope  cath dee  eve  fay  bea  jan  ivy  gay ]
+    [col  hope eve  abi  dee  bea  fay  ivy  gay  cath jan ]
+    [dan  jan  bea  dee  gay  hope eve  ivy  fay  cath abi ]
+    [ed   fay  dee  bea  cath jan  eve  abi  ivy  hope gay ]
+    [fred bea  abi  dee  gay  eve  ivy  cath jan  hope fay ]
+    [gav  gay  eve  ivy  bea  cath abi  dee  hope jan  fay ]
+    [hal  abi  eve  hope fay  ivy  cath jan  bea  gay  dee ]
+    [ian  hope cath dee  gay  bea  abi  fay  ivy  jan  eve ]
+    [jon  abi  fay  jan  gay  eve  bea  dee  cath ivy  hope]))
+(define women-preferences-4
+  '([abi  bob  fred jon  gav  ian  abe  dan  ed   col  hal ]
+    [bea  bob  abe  col  fred gav  dan  ian  ed   jon  hal ]
+    [cath fred bob  ed   gav  hal  col  ian  abe  dan  jon ]
+    [dee  fred jon  col  abe  ian  hal  gav  dan  bob  ed  ]
+    [eve  jon  fred dan  abe  gav  col  hal  ed   ian  bob ]
+    [fay  bob  abe  ed   ian  jon  dan  fred gav  col  hal ]
+    [gay  jon  gav  hal  fred bob  abe  col  ed   dan  ian ]
+    [hope gav  jon  bob  abe  ian  dan  hal  ed   col  fred]
+    [ivy  ian  col  hal  gav  fred bob  abe  ed   jon  dan ]
+    [jan  ed   hal  gav  abe  bob  jon  col  ian  fred dan ]))
 
-(exercițiul 1 : 15 puncte)
-(check-part 'a (/ 1 3) (get-men men-preferences-0) is '(adi bobo cos))
-(check-part 'b (/ 1 3) (get-men men-preferences-1) is '(abe bob col dan ed fred gav hal ian jon))
-(check-part 'c (/ 1 3) (get-men men-preferences-2) is '(abe bob col dan ed fred gav hal ian jon))
+; Admite '((sof . ovid) (ema . iani) (nat . ionu))
+;    sau '((sof . iani) (nat . ionu) (ema . ovid))
+(define men-preferences-5
+  '([ionu nat sof ema]
+    [iani nat ema sof]
+    [ovid nat sof ema]))
+(define women-preferences-5
+  '([sof iani ionu ovid]
+    [nat ionu iani ovid]
+    [ema ovid iani ionu]))
 
-(exercițiul 2 : 15 puncte)
-(check-part 'a (/ 1 3) (get-women women-preferences-0) is '(ana bia cora))
-(check-part 'b (/ 1 3) (get-women women-preferences-1) is '(abi bea cath dee eve fay gay hope ivy jan))
-(check-part 'c (/ 1 3) (get-women women-preferences-2) is '(abi bea cath dee eve fay gay hope ivy jan))
+(define (sort-engagements engagements) (sort engagements (λ (p1 p2) (symbol<? (car p1) (car p2)))))
 
-(exercițiul 3 : 15 puncte)
-(check-part 'a (/ 1 3) (get-pref-list women-preferences-0 'cora) is '(bobo cos adi))
-(check-part 'b (/ 1 3) (get-pref-list women-preferences-1 'bea) is '(bob abe col fred gav dan ian ed jon hal))
-(check-part 'c (/ 1 3) (get-pref-list men-preferences-2 'bob) is '(abi hope  cath dee  eve  fay  bea  jan  ivy  gay))
+; Hack pentru a nu testa exact valoarea unui rezultat, ci a folosi condițiile.
+(define ignore-exact-test (cons (lambda (_ __) #t) "this shouldn't happen?..."))
+
+; Verifică dacă toate persoanele au fost împerecheate într-un mod stabil.
+(define (correct-engagements mpref wpref engagements)
+  (if (equal? engagements 'your-code-here) #f
+      (let ([women-matched (map car engagements)]
+            [men-matched (map cdr engagements)])
+        (and (andmap (lambda (pref) (member (car pref) women-matched)) wpref)
+             (andmap (lambda (pref) (member (car pref) men-matched)) mpref)
+             (stable-match? engagements mpref wpref)))))
+
+
+(sunt 5 exerciții)
+
+(exercițiul 1 : 40 puncte)
+(check-part 'a (/ 1 5)
+            (let ([result (map (λ (eng) (get-unstable-couples eng men-preferences-0 women-preferences-0))
+                               '(((ana . adi) (bia . cos) (cora . bobo))
+                                 ((ana . cos) (bia . adi) (cora . bobo))))])
+              (if (equal? (car result) 'your-code-here)
+                  'your-code-here
+                  (map sort-engagements result)))
+            is '(() ((ana . cos) (bia . adi))))
+
+(check-part 'b (/ 1 5)
+            (let ([result (map (λ (eng) (get-unstable-couples eng men-preferences-1 women-preferences-1))
+                               '(((fay . jon) (dee . col) (cath . abe) (gay . gav) (bea . fred) (jan . ed) (ivy . dan) (hope . ian) (eve . hal) (abi . bob))
+                                 ((fay . dan) (dee . col) (eve . hal) (gay . gav) (bea . fred) (jan . ed) (ivy . abe) (hope . ian) (cath . bob) (abi . jon))))])
+              (if (equal? (car result) 'your-code-here)
+                  'your-code-here
+                  (map sort-engagements result)))
+            is '(((abi . bob) (cath . abe) (hope . ian)) ()))
+
+(check-part 'c (/ 1 5)
+            (let ([result (map (λ (eng) (get-unstable-couples eng men-preferences-2 women-preferences-2))
+                               '(((fay . jon) (dee . col) (cath . abe) (gay . gav) (bea . bob) (jan . ed) (ivy . dan) (hope . ian) (eve . hal) (abi . fred))
+                                 ((fay . dan) (dee . col) (eve . hal) (gay . gav) (bea . fred) (jan . ed) (ivy . abe) (hope . ian) (cath . bob) (abi . jon))))])
+              (if (equal? (car result) 'your-code-here)
+                  'your-code-here
+                  (map sort-engagements result)))
+            is '(((abi . fred) (bea . bob) (cath . abe) (fay . jon) (hope . ian)) ((abi . jon) (cath . bob) (hope . ian))))
+
+(check-part 'd (/ 1 5)
+            (let ([result (map (λ (eng) (get-unstable-couples eng men-preferences-3 women-preferences-3))
+                               '(((fay . ed) (dee . col) (cath . abe) (gay . gav) (bea . bob) (jan . jon) (ivy . dan) (hope . ian) (eve . hal) (abi . fred))
+                                 ((fay . dan) (dee . fred) (eve . hal) (gay . gav) (bea . col) (jan . ed) (ivy . abe) (hope . ian) (cath . bob) (abi . jon))))])
+              (if (equal? (car result) 'your-code-here)
+                  'your-code-here
+                  (map sort-engagements result)))
+            is '(((abi . fred) (bea . bob) (cath . abe) (fay . ed) (hope . ian))
+                 ((abi . jon) (cath . bob) (dee . fred) (fay . dan) (hope . ian) (jan . ed))))
+
+(check-part 'e (/ 1 5)
+            (let ([result (map (λ (eng) (get-unstable-couples eng men-preferences-5 women-preferences-5))
+                               '(((sof . ovid) (ema . iani) (nat . ionu))
+                                 ((sof . iani) (nat . ionu) (ema . ovid))
+                                 ((sof . iani) (nat . ovid) (ema . ionu))))])
+              (if (equal? (car result) 'your-code-here)
+                  'your-code-here
+                  (map sort-engagements result)))
+            is '(() () ((ema . ionu) (nat . ovid) (sof . iani))))
+
+
+(exercițiul 2 : 50 puncte)
+(let* ([mpref men-preferences-0]
+       [wpref women-preferences-0]
+       [result (engage '(adi bobo) '((cora . cos)) mpref wpref)]
+       [checker ((curry correct-engagements) mpref wpref)])
+  (check-part 'a (/ 1 5) result ignore-exact-test 'nil . (checker)))
+
+(let* ([mpref men-preferences-1]
+       [wpref women-preferences-1]
+       [result (engage '(abe bob col dan ed fred gav hal ian jon) '() mpref wpref)]
+       [checker ((curry correct-engagements) mpref wpref)])
+  (check-part 'b (/ 1 5) result ignore-exact-test 'nil . (checker)))
+
+(let* ([mpref men-preferences-2]
+       [wpref women-preferences-2]
+       [result (engage '(abe bob dan ed fred gav ian jon) '((abi . hal) (hope . col)) mpref wpref)]
+       [checker ((curry correct-engagements) mpref wpref)])
+  (check-part 'c (/ 1 5) result ignore-exact-test 'nil . (checker)))
+
+(let* ([mpref men-preferences-3]
+       [wpref women-preferences-3]
+       [result (engage '(abe bob col dan ed fred gav hal ian jon) '() mpref wpref)]
+       [checker ((curry correct-engagements) mpref wpref)])
+  (check-part 'd (/ 1 5) result ignore-exact-test 'nil . (checker)))
+
+(let* ([mpref men-preferences-4]
+       [wpref women-preferences-4]
+       [result (engage '(gav abe col dan ed bob fred hal ian jon) '() mpref wpref)]
+       [checker ((curry correct-engagements) mpref wpref)])
+  (check-part 'e (/ 1 5) result ignore-exact-test 'nil . (checker)))
+
+
+(exercițiul 3 : 10 puncte)
+(let* ([mpref men-preferences-0]
+       [wpref women-preferences-0]
+       [result (gale-shapley mpref wpref)]
+       [checker ((curry correct-engagements) mpref wpref)])
+  (check-part 'a (/ 1 2) result ignore-exact-test 'nil . (checker)))
+
+(let* ([mpref men-preferences-1]
+       [wpref women-preferences-1]
+       [result (gale-shapley mpref wpref)]
+       [checker ((curry correct-engagements) mpref wpref)])
+  (check-part 'b (/ 1 2) result ignore-exact-test 'nil . (checker)))
+
 
 (exercițiul 4 : 20 puncte)
-(check-part 'a (/ 1 4) (preferable? '(ana bia cora) 'ana 'bia) is #t)
-(check-part 'b (/ 1 4) (preferable? '(bob abe col fred gav dan ian ed jon hal) 'dan 'gav) is #f)
-(check-part 'c (/ 1 4) (preferable? '(ana bia cora) 'cora 'ana) is #f)
-(check-part 'c (/ 1 4) (preferable? '(bob abe col fred gav dan ian ed jon hal) 'fred 'ian) is #t)
+(check-part 'a (/ 1 2)
+            (let ([result (get-couple-members '((fay . dan) (dee . col) (eve . hal) (gay . gav)))])
+              (if (equal? result 'your-code-here)
+                  'your-code-here
+                  (sort result symbol<?))) is '(col dan dee eve fay gav gay hal))
 
-(exercițiul 5 : 15 puncte)
-(check-part 'a (/ 1 3) (get-partner '((ana . cos) (bia . adi) (cora . bobo)) 'cora) is 'bobo)
-(check-part 'b (/ 1 3) (get-partner '((ana . cos) (bia . adi) (cora . bobo)) 'adi) is #f)
-(check-part 'c (/ 1 3) (get-partner '((ana . cos) (bia . adi) (cora . bobo)) 'ema) is #f)
-
-(exercițiul 6 : 40 puncte)
-(check-part 'a (/ 1 4)
-            (map (λ (eng) (better-match-exists? 'cos 'ana '(cora bia ana) women-preferences-0 eng))
-                 '(((ana . cos) (bia . bobo) (cora . adi)) ((ana . cos) (bia . adi) (cora . bobo))))
-            is '(#t #f))
-(check-part 'b (/ 1 4)
-            (map (λ (eng) (better-match-exists? 'bob 'abi '(cath hope abi  dee  eve  fay  bea  jan  ivy  gay) women-preferences-1 eng))
-                 '(((fay . dan) (dee . col) (eve . hal) (gay . gav) (bea . jon) (jan . ed) (ivy . abe) (hope . ian) (cath . fred) (abi . bob))
-                   ((fay . jon) (dee . col) (cath . abe) (gay . gav) (bea . fred) (jan . ed) (ivy . dan) (hope . ian) (eve . hal) (abi . bob))
-                   ((fay . dan) (dee . col) (eve . hal) (gay . gav) (bea . ian) (jan . ed) (ivy . abe) (hope . jon) (cath . fred) (abi . bob))))
-            is '(#t #t #f))
-(check-part 'c (/ 1 4)
-            (map (λ (eng) (better-match-exists? 'gay 'gav '(jon  gav  hal  fred bob  abe  col  ed   dan  ian) men-preferences-1 eng))
-                 '(((dan . fay) (col . dee) (hal . eve) (gav . gay) (fred . bea) (ed . jan) (abe . ivy) (ian . hope) (bob . cath) (jon . abi))
-                   ((jon . fay) (col . dee) (abe . cath) (gav . gay) (fred . bea) (ed . jan) (dan . ivy) (ian . hope) (hal . eve) (bob . abi))
-                   ((jon . eve) (col . dee) (abe . cath) (gav . gay) (fred . bea) (ed . jan) (dan . ivy) (ian . hope) (hal . fay) (bob . abi))))
-            is '(#f #f #t))
-(check-part 'd (/ 1 4)
-            (map (λ (eng) (better-match-exists? 'cath 'abe '(fred bob  ed   gav  hal  col  ian  abe  dan  jon) men-preferences-2 eng))
-                 '(((dan . fay) (col . dee) (hal . eve) (gav . gay) (fred . bea) (ed . jan) (bob . ivy) (ian . hope) (abe . cath) (jon . abi))
-                   ((jon . fay) (col . dee) (abe . cath) (gav . gay) (fred . bea) (ed . jan) (dan . ivy) (ian . hope) (hal . eve) (bob . abi))
-                   ((jon . eve) (col . dee) (abe . cath) (gav . gay) (fred . bea) (ed . jan) (dan . ivy) (ian . hope) (hal . fay) (bob . abi))))
-            is '(#t #f #f))
+(check-part 'b (/ 1 2)
+            (let ([result (get-couple-members '((cora . bobo)))])
+              (if (equal? result 'your-code-here)
+                  'your-code-here
+                  (sort result symbol<?))) is '(bobo cora))
 
 (sumar)
