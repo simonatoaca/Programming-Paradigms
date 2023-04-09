@@ -53,25 +53,25 @@
 ;   aceste persoane cu valoarea #f, astfel încât funcția să
 ;   întoarcă în aceeași listă atât informația despre cine din
 ;   cameră este logodit, cât și despre cine este singur
+
 (define (match person engagements pref1 pref2 queue)
   (let ((person-pref (get-pref-list pref1 person)))
-    (let go-through-prefs ((potential-partner (car person-pref)) (pref (cdr person-pref)) (engs engagements))
+    (let go-through-prefs ((pref person-pref) (engs engagements))
       (if (null? pref)
-          (let ((single (find-first (λ (x) (equal? (cdr x) #f)) engs)))
-            (if single
-                (update-engagements engs (car single) person)
-                (cons (cons #f person) engs)))
-          (let ((other-person (get-partner engagements potential-partner)))
-            (if other-person
-                ; daca person este un better match pt cineva decat partenerul sau curent
-                (if (preferable? (get-pref-list pref2 potential-partner) person other-person)
-                    (let ((new-engagements (update-engagements engs potential-partner person)))
-                      ; incearca sa combini persoana ramasa singura dupa ce person s-a logodit cu partenerul acesteia
-                      (match other-person new-engagements pref1 pref2 queue))
-                    (go-through-prefs (car pref) (cdr pref) engs))  
-                (go-through-prefs (car pref) (cdr pref) engs)))))))
+          (cons (cons #f person) engs)
+          (let ((potential-partner (car pref)))
+            (if (find-first (λ(x) (equal? x potential-partner)) queue) ; daca potential-partner este in queue, nu in camera, treci la urmatorul
+                (go-through-prefs (cdr pref) engs)
+                (let ((other-person (get-partner engs potential-partner)))
+                  (if other-person ; potential-partner este in camera si are partener
+                      ; daca person este un better match pt cineva decat partenerul sau curent
+                      (if (preferable? (get-pref-list pref2 potential-partner) person other-person)
+                          (let ((new-engagements (update-engagements engs potential-partner person)))
+                            ; incearca sa combini persoana ramasa singura dupa ce person s-a logodit cu partenerul acesteia
+                            (match other-person new-engagements pref1 pref2 queue))
+                          (go-through-prefs (cdr pref) engs))
+                      (update-engagements engs potential-partner person)))))))))
 
-(trace match)
 ; TODO 2
 ; Implementați funcția path-to-stability care primește lista
 ; engagements a cuplurilor din cameră, o listă de preferințe 
@@ -86,16 +86,14 @@
 ; - persoanele nelogodite din cameră apar în engagements sub forma
 ;   (#f . nume-bărbat) sau (nume-femeie . #f)
 (define (path-to-stability engagements mpref wpref queue)
-  (let iter-queue ((q (cdr queue)) (next-person (car queue)) (engs engagements))
-    (trace iter-queue)
-    (let ((new-engs (if (find-first (λ (x) (equal? next-person (car x))) mpref)
-                        (match next-person engs mpref wpref q)
-                        (rev-eng (match next-person (rev-eng engs) wpref mpref q)))))
-      (if (null? q)
-          new-engs
-          (iter-queue (cdr q) (car q) new-engs)))))
-
-(trace path-to-stability)
+  (let iter-queue ((q queue) (engs engagements))
+    (if (null? q)
+        engs
+        (let ((next-person (car q)))
+          (let ((new-engs (if (find-first (λ (x) (equal? next-person (car x))) mpref)
+                              (match next-person engs mpref wpref (cdr q))
+                              (rev-eng (match next-person (rev-eng engs) wpref mpref (cdr q))))))
+            (iter-queue (cdr q) new-engs))))))
 
 ; TODO 3
 ; Implementați funcția update-stable-match care primește o listă 
@@ -111,8 +109,15 @@
 ; Precizări (aspecte care se garantează, nu trebuie verificate):
 ; - fiecare cuplu din lista engagements are pe prima poziție
 ;   o femeie
+(define (stable-matches engagements mpref wpref)
+  (filter (λ (x) (not (or (better-match-exists? (cdr x) (car x) (get-pref-list mpref (cdr x)) wpref engagements)
+                          (better-match-exists? (car x) (cdr x) (get-pref-list wpref (car x)) mpref (rev-eng engagements))))) engagements))
+
 (define (update-stable-match engagements mpref wpref)
-  'your-code-here)
+  (let ((unstable (get-unstable-couples engagements mpref wpref))
+        (room-engagements (stable-matches engagements mpref wpref)))
+    (let ((queue (get-couple-members unstable)))
+      (path-to-stability room-engagements mpref wpref queue))))
 
 
 ; TODO 4
@@ -129,7 +134,19 @@
 ; Trebuie să lucrați cu interfața pentru fluxuri. Dacă rezolvați
 ; problema folosind liste și doar convertiți în/din fluxuri,
 ; punctajul pe acest exercițiu se anulează în totalitate.
-(define (build-stable-matches-stream pref-stream)
-  'your-code-here)
+(define (build-stream elem pref-stream)
+  (if (stream-empty? pref-stream)
+      empty-stream
+      (let ((first-elem (stream-first pref-stream)))
+        (let ((next (update-stable-match elem (car first-elem) (cdr first-elem))))
+          (stream-cons elem (stream-cons next (build-stream next (stream-rest pref-stream))))))))
 
+(define (build-stable-matches-stream pref-stream)
+  (if (stream-empty? pref-stream)
+      empty-stream
+      (let* ((first-elem (stream-first pref-stream)) (sol0 (gale-shapley (car first-elem) (cdr first-elem))))
+        (build-stream sol0 (stream-rest pref-stream)))))
+
+;(trace build-stable-matches-stream)
+;(trace build-stream)
 
