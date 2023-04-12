@@ -4,7 +4,6 @@
 (require "etapa3.rkt")
 
 (provide (all-defined-out))
-(require racket/trace)
 
 ;; Preferințele bărbaților și femeilor din problemă se pot schimba
 ;; în timp, dar de obicei ele nu se schimbă radical de la un moment
@@ -139,14 +138,12 @@
       empty-stream
       (let ((first-elem (stream-first pref-stream)))
         (let ((next (update-stable-match elem (car first-elem) (cdr first-elem))))
-          (stream-cons elem (stream-cons next (build-stream next (stream-rest pref-stream))))))))
+          (stream-cons next (build-stream next (stream-rest pref-stream)))))))
 
 (define (build-stable-matches-stream pref-stream)
   (if (stream-empty? pref-stream)
       empty-stream
       (let* ((first-elem (stream-first pref-stream)) (sol0 (gale-shapley (car first-elem) (cdr first-elem))))
-        (build-stream sol0 (stream-rest pref-stream)))))
+        (stream-cons sol0 (build-stream sol0 (stream-rest pref-stream))))))
 
-;(trace build-stable-matches-stream)
-;(trace build-stream)
 
