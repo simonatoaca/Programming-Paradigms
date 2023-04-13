@@ -3,6 +3,8 @@ module BinaryNumber where
 import Data.List
 import Data.Tuple (swap)
 
+import Debug.Trace
+
 {-
     Reprezentarea unui număr binar ca listă finită sau infinită de biți.
     Primul bit este cel mai puțin semnificativ.
@@ -28,7 +30,8 @@ type BinaryNumber = [Int]
     6
 -}
 toDecimal :: BinaryNumber -> Int
-toDecimal = undefined
+-- toDecimal = foldr (\x acc -> 2 * acc + x) 0 - de aici am pornit
+toDecimal = foldr (flip ((+) . (2 *))) 0
 
 {-
     *** TODO ***
