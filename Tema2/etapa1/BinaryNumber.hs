@@ -30,7 +30,7 @@ type BinaryNumber = [Int]
     6
 -}
 toDecimal :: BinaryNumber -> Int
--- toDecimal = foldr (\x acc -> 2 * acc + x) 0 - de aici am pornit
+-- toDecimal = foldr (\x acc -> 2 * acc + x) 0 - de aici am pornit (regula lui Horner)
 toDecimal = foldr (flip ((+) . (2 *))) 0
 
 {-
@@ -54,7 +54,8 @@ toDecimal = foldr (flip ((+) . (2 *))) 0
     [0,1,1,0,0,0,0,0,0,0]
 -}
 toBinary :: Int -> BinaryNumber
-toBinary = undefined
+-- toBinary = unfoldr (\x -> Just (snd $ divMod x 2, fst $ divMod x 2))
+toBinary = unfoldr (Just . swap . (flip divMod 2))
 
 {-
     *** TODO ***
@@ -75,7 +76,8 @@ toBinary = undefined
     [0,0,0,1]
 -}
 inc :: BinaryNumber -> BinaryNumber
-inc bits = undefined
+inc (0 : xs) = 1 : xs
+inc (1 : xs) = 0 : inc xs
 
 {-
    *** TODO ***
@@ -96,7 +98,8 @@ inc bits = undefined
     [1,1,1]
 -}
 dec :: BinaryNumber -> BinaryNumber
-dec bits = undefined
+dec (1 : xs) = 0 : xs
+dec (0 : xs) = 1 : dec xs
 
 {-
     *** TODO ***
@@ -122,7 +125,15 @@ dec bits = undefined
     197
 -}
 add :: BinaryNumber -> BinaryNumber -> BinaryNumber
-add bits1 bits2 = undefined
+add bits1 bits2 = snd result ++ [fst result] -- se adauga bitul de carry la final
+    where 
+        operands = zipWith (+) bits1 bits2
+        result = mapAccumL (\acc x -> case x + acc of
+                                        0 -> (0, 0)
+                                        1 -> (0, 1)
+                                        2 -> (1, 0)
+                                        3 -> (1, 1)
+                                        otherwise -> (0, 0)) 0 operands
 
 {-
     *** TODO ***
@@ -155,7 +166,8 @@ add bits1 bits2 = undefined
     [[0,1,1,0,0,0],[0,0,0,0,0,0],[0,0,0,1,1,0]]
 -}
 stack :: BinaryNumber -> BinaryNumber -> [BinaryNumber]
-stack bits1 bits2 = undefined
+-- ia fiecare lista shiftata si o inmulteste cu bitul corespunzator din bits2
+stack bits1 bits2 = [x | x <- zipWith (map . (*)) bits2 (iterate (0:) bits1)]
 
 {-
     *** TODO ***
@@ -176,7 +188,8 @@ stack bits1 bits2 = undefined
     [0,6,6,30,30]
 -}
 multiply :: BinaryNumber -> BinaryNumber -> [BinaryNumber]
-multiply bits1 bits2 = undefined
+multiply bits1 bits2 = scanl (add) [0, 0 ..] bitStack
+    where bitStack = stack bits1 bits2
 
 {-
     *** TODO ***
