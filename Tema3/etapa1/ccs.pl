@@ -150,16 +150,11 @@ ccw(Tile, 3, RotatedTile) :- ccw(Tile, 2, R2), rotateOnce(R2, RotatedTile).
 %
 % Folosiți recursivitate (nu meta-predicate).
 
-% addRotation(+Tile, -List, +NumRot)
-% addRotation(OriginalTile, Tile, [], 0) :- ccw(Tile, 1, R1), addRotation(OriginalTile, R1, [(0, Tile)], 1).
-% addRotation(OriginalTile, OriginalTile, _, _) :- true.
-% addRotation(OriginalTile, Tile, L, NumRot) :- ccw(Tile, 1, R1),
-%                         addRotation(OriginalTile, R1, [(NumRot, R1) | L], NumRot + 1).
+% addRotation(+Tile, +Acc, -RotationPairs, +NumRot)
+addRotation(Tile, L, Res, NumRot) :- ccw(Tile, NumRot, R1), Tile \== R1, NextRot is NumRot + 1,
+                        addRotation(R1, [(NumRot, R1) | L], Res, NextRot); Res = L.
 
-
-rotations(_, _) :- false.
-
-
+rotations(Tile, RotationPairs) :- addRotation(Tile, [(0, Tile)], RotationPairs, 1).
 
 
 % match/3

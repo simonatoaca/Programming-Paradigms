@@ -2,7 +2,7 @@
 
 
 editall :- forall(member(File, [
-                             ccs, utils, testing, inputs, 'checker.pl', points1
+                             ccs, utils, testing, 'checker.pl', points1
                          ]), edit(File)).
 
 

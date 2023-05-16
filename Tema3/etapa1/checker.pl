@@ -161,7 +161,8 @@ total_units([wait, P, _|R], Tot, A, B, C) :-
 total_units([wait, _|R], Tot, CO/TCO, UO/TUO, OO/TOO) :- !,
     total_units(R, TotR, CO/TCO, UO/TUO, OO/TOO), Tot is TotR + 1.
 total_units([P, T|R], Tot, A, B, C) :-
-    number(P), !, total_units([counted, T|R], TotR, A, B, C), Tot is TotR + P.
+    number(P), !, total_units([counted, T|R], TotR, A, B, C),
+    (   P >= 0 -> Tot is TotR + P; Tot is TotR).
 total_units([counted, T|R], Tot, CO/TCO, UO/TUO, OO/TOO) :- !, %trace,
     test(T, dry, dry, _, _, 0, P),
     (   ( T = chk(_), ! ; T = ckA(_, _) ), !, TA = 1,
@@ -186,6 +187,7 @@ test(T, NEx, Idx, Fraction, Unit, PointsIn, PointsOut) :-
             ;   swritef(Ex, '[%w|%w]', [NEx, CEx]))
         ),
         swritef(MTime, 'limita de %w secunde depasita', [TimeLimit]),
+        (   number(Fraction), Fraction < 0 -> writeln("Urmatoarea interogare este de asteptat sa esueze."); true),
         (   catch(
                 catch(call_with_time_limit(TimeLimit, once(test(Ex, T))),
                       time_limit_exceeded,
@@ -204,7 +206,8 @@ success(Ex, Fraction, Unit, Score) :-
     Score is Fraction * Unit,
     %format('~w ~w ~w ~w~n', [Ex, Fraction, Unit, Score]),
     (   test_mode(vmchecker), !,
-        format('+~2f ~10t  ~w Corect.~n', [Score, Ex])
+        (   Fraction < 0 -> Sign = ""; Sign = "+"),
+        format('~w~2f ~10t  ~w Corect.~n', [Sign, Score, Ex])
     ;
     (   test_points(show),
         format('~w[OK] Corect. +~2f.~n', [Ex, Score])
@@ -274,6 +277,16 @@ testExp(Ex, Text, Vars, [v(Var) | Rest]) :- !,
     (   getVal(Var, Vars, V), !,
         (   var(V), !, testExp(Ex, Text, Vars, Rest) ;
             swritef(M, 'Interogarea %w leaga %w (la valoarea %w) dar nu ar fi trebuit legata.',
+                    [Text, Var, V]), failure(Ex, M)
+        )
+    ;
+    swritef(M, 'INTERN: Interogarea %w nu contine variabila %w.', [Text, Var]),
+    failure(Ex, M)
+    ).
+testExp(Ex, Text, Vars, [val(Var) | Rest]) :- !,
+    (   getVal(Var, Vars, V), !,
+        (   \+ var(V), !, testExp(Ex, Text, Vars, Rest) ;
+            swritef(M, 'Interogarea %w nu leaga variabila %w dar ar fi trebuit sa o lege.',
                     [Text, Var, V]), failure(Ex, M)
         )
     ;
