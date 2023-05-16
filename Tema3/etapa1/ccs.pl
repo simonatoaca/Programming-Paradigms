@@ -152,7 +152,7 @@ ccw(Tile, 3, RotatedTile) :- ccw(Tile, 2, R2), rotateOnce(R2, RotatedTile).
 
 % addRotation(+Tile, +Acc, -RotationPairs, +NumRot)
 addRotation(Tile, L, Res, NumRot) :- ccw(Tile, NumRot, R1), Tile \== R1, NextRot is NumRot + 1,
-                        addRotation(R1, [(NumRot, R1) | L], Res, NextRot); Res = L.
+                        addRotation(R1, [(NumRot, R1) | L], Res, NextRot); Res = L. % Cand ajunge la RotationTile == Tile -> pune rezultatul in Res
 
 rotations(Tile, RotationPairs) :- addRotation(Tile, [(0, Tile)], RotationPairs, 1).
 
@@ -171,9 +171,12 @@ rotations(Tile, RotationPairs) :- addRotation(Tile, [(0, Tile)], RotationPairs, 
 % ccw(T8, 3, T8R), match(T8R, T10, w).
 %
 % Puteți folosi predicatul opposite/2 din utils.pl.
+
 match(Tile, NeighborTile, NeighborDirection) :- opposite(NeighborDirection, TileDirection),
                                             at(Tile, NeighborDirection, What),
                                             at(NeighborTile, TileDirection, What).
+                                            
+
 
 
 % findRotation/3
@@ -199,7 +202,17 @@ match(Tile, NeighborTile, NeighborDirection) :- opposite(NeighborDirection, Tile
 % soluția de mai sus s-ar reduce doar la rotația 3.
 %
 % Hint: Prolog face backtracking automat. Folosiți match/3.
-findRotation(_, _, _) :- false.
+
+% checkFit(+Tile, +Neighbors) e adevarata daca Tile se potriveste cu toti vecinii
+checkFit(_, []) :- true.
+checkFit(Tile, [(NeighborTile, NeighborDirection) | Rest]) :- 
+                    match(Tile, NeighborTile, NeighborDirection),
+                    checkFit(Tile, Rest).
+
+findRotation(Tile, Neighbors, Rotation) :- checkFit(T1, Neighbors),
+                                            ccw(Tile, Rotation, T1).
+
+
 
 
 
