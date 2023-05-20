@@ -366,17 +366,22 @@ getAvailablePositions(Board, Positions) :- \+ emptyBoard(Board),
 % În ieșirea de la teste, rezultatele vor fi asamblate ca
 % (X,Y):Rotation.
 
-% Genereaza lista de vecini de tip (NeighborDir, NeighborTile)
-getNeighbor(Board, (X, Y), Tile, Dir) :- member(Dir, directions),
-                                         neighbor((X, Y), Dir, (XN, YN)),
-                                         member(XN/YN/Tile, Board).
+% getNeighbor(+Board, -Position, -Tile, - Dir)/4
+% Genereaza lista de vecini de tip (NeighborTile, NeighborDir)
+getNeighbor(Board, (X, Y), (Tile, Dir)) :- neighbor((X, Y), Dir, (XN, YN)),
+                                           member(XN/YN/Tile, Board).
+
+% Genereaza rezultatele
+validMove(Board, Tile, Pos, Rot, Positions) :- member(Pos, Positions),
+                                    findall((NeighTile, NeighDir), getNeighbor(Board, Pos, (NeighTile, NeighDir)), Neighbors),
+                                    rotations(Tile, RotationPairs), % ca sa scot rotatiile duplicate
+                                    findRotation(Tile, Neighbors, Rot),
+                                    member((Rot, _), RotationPairs). % scot rotatiile duplicate
 
 findPositionForTile([], _, Position, Rotation) :- Position = (0, 0), Rotation = 0.
 findPositionForTile(Board, Tile, Position, Rotation) :-
                 getAvailablePositions(Board, Positions),
-                member(Position, Positions),
-                findall((NeighTile, NeighDir), getNeighbor(Board, Position, NeighTile, NeighDir), Neighbors),
-                findRotation(Tile, Neighbors, Rotation).
+                validMove(Board, Tile, Position, Rotation, Positions).
 
 
 
